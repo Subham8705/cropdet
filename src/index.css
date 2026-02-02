@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Agricultural Design System - Green Earth-Toned Theme */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Core palette - Forest greens */
+    --background: 120 25% 98%;
+    --foreground: 150 40% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 40% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 40% 12%;
+
+    /* Primary - Rich forest green */
+    --primary: 142 55% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Warm earth brown */
+    --secondary: 30 25% 92%;
+    --secondary-foreground: 30 40% 25%;
+
+    /* Muted - Soft sage */
+    --muted: 120 15% 93%;
+    --muted-foreground: 120 10% 45%;
+
+    /* Accent - Wheat gold */
+    --accent: 42 85% 55%;
+    --accent-foreground: 42 90% 15%;
+
+    /* Success - Healthy crop green */
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning - Harvest orange */
+    --warning: 32 95% 50%;
+    --warning-foreground: 32 90% 15%;
+
+    /* Destructive - Alert red */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 15% 88%;
+    --input: 120 15% 88%;
+    --ring: 142 55% 32%;
+
+    --radius: 0.75rem;
+
+    /* Chart colors - Agricultural spectrum */
+    --chart-1: 142 55% 32%;
+    --chart-2: 42 85% 55%;
+    --chart-3: 30 40% 35%;
+    --chart-4: 180 40% 40%;
+    --chart-5: 0 72% 51%;
+
+    /* Gradient definitions */
+    --gradient-hero: linear-gradient(135deg, hsl(142 55% 32%), hsl(120 40% 25%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(120 25% 97%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(42 85% 55%), hsl(32 95% 50%));
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px -2px hsl(142 55% 32% / 0.1);
+    --shadow-md: 0 8px 24px -4px hsl(142 55% 32% / 0.15);
+    --shadow-lg: 0 16px 48px -8px hsl(142 55% 32% / 0.2);
+    --shadow-glow: 0 0 40px hsl(142 55% 32% / 0.3);
+
+    /* Sidebar */
+    --sidebar-background: 120 25% 97%;
+    --sidebar-foreground: 150 40% 12%;
+    --sidebar-primary: 142 55% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 15% 93%;
+    --sidebar-accent-foreground: 150 40% 12%;
+    --sidebar-border: 120 15% 88%;
+    --sidebar-ring: 142 55% 32%;
+  }
+
+  .dark {
+    --background: 150 30% 8%;
+    --foreground: 120 20% 95%;
+
+    --card: 150 25% 12%;
+    --card-foreground: 120 20% 95%;
+
+    --popover: 150 25% 12%;
+    --popover-foreground: 120 20% 95%;
+
+    --primary: 142 55% 45%;
+    --primary-foreground: 150 40% 8%;
+
+    --secondary: 30 15% 18%;
+    --secondary-foreground: 30 20% 85%;
+
+    --muted: 150 15% 18%;
+    --muted-foreground: 120 10% 60%;
+
+    --accent: 42 75% 50%;
+    --accent-foreground: 42 90% 10%;
+
+    --success: 142 60% 50%;
+    --success-foreground: 150 40% 8%;
+
+    --warning: 32 85% 55%;
+    --warning-foreground: 32 90% 10%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 15% 20%;
+    --input: 150 15% 20%;
+    --ring: 142 55% 45%;
+
+    --sidebar-background: 150 25% 10%;
+    --sidebar-foreground: 120 20% 95%;
+    --sidebar-primary: 142 55% 45%;
+    --sidebar-primary-foreground: 150 40% 8%;
+    --sidebar-accent: 150 15% 15%;
+    --sidebar-accent-foreground: 120 20% 95%;
+    --sidebar-border: 150 15% 20%;
+    --sidebar-ring: 142 55% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-success;
+  }
+
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .btn-glow {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-grow {
+    animation: grow 0.5s ease-out forwards;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
