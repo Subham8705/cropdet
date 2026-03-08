@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, Camera, Loader2, AlertTriangle, CheckCircle2, Info, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-// import { supabase } from "@/integrations/supabase/client";
+import { saveDetection } from "@/lib/history";
 
 interface DetectionResult {
   disease_name: string;
@@ -88,6 +88,12 @@ export default function DiseaseDetection() {
       const data = await response.json();
 
       setResult(data as DetectionResult);
+      // Save to localStorage for dashboard history
+      saveDetection({
+        disease_name: data.disease_name,
+        confidence: data.confidence,
+        severity: data.severity,
+      });
       toast({
         title: "Analysis Complete",
         description: "Disease detection results are ready.",

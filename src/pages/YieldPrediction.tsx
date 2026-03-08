@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, Loader2, Droplets, Thermometer, Wind, BarChart3, AlertCircle, CheckCircle2, CloudSun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { savePrediction } from "@/lib/history";
 
 interface PredictionResult {
   predicted_yield: number;
@@ -89,6 +89,17 @@ export default function YieldPrediction() {
       const data = await response.json();
 
       setResult(data as PredictionResult);
+      // Save to localStorage for dashboard history
+      savePrediction({
+        crop_type: formData.cropType,
+        location: formData.location,
+        predicted_yield: data.predicted_yield,
+        min_yield: data.min_yield,
+        max_yield: data.max_yield,
+        unit: data.unit,
+        risk_level: data.risk_level,
+        confidence: data.confidence,
+      });
       toast({
         title: "Prediction Complete",
         description: "Your yield prediction is ready.",
