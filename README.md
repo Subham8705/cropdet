@@ -1,73 +1,101 @@
-# Welcome to your Lovable project
+# 🌾 CropWise AI
 
-## Project info
+AI-powered crop disease detection and yield prediction system built for farmers — no login required.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **🔬 Disease Detection** — Upload a leaf image and get instant AI diagnosis with treatment recommendations
+- **📊 Yield Prediction** — Enter environmental data (temp, rainfall, humidity, soil) to get yield estimates with risk levels
+- **📈 Dashboard** — Track your detection and prediction history (stored locally on your device)
+- **☁️ Weather Integration** — Auto-fetch temperature & humidity from OpenWeatherMap by location
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+| Layer | Technology |
+|---|---|
+| Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui |
+| Backend | Python, FastAPI, Uvicorn |
+| Disease Model | TensorFlow/Keras, MobileNetV2 (transfer learning) |
+| Yield Engine | Rule-based scoring with agronomic knowledge base |
+| Dataset | PlantVillage (54,000+ labeled crop images, 38 classes) |
+| Data Storage | Browser localStorage (no database needed) |
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js & npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Python 3.10+ & pip
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Frontend
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# Clone the repo
+git clone https://github.com/Subham8705/cropdet.git
+cd cropdet
 
-Follow these steps:
+# Install dependencies
+npm install
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start dev server (runs on http://localhost:8080)
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Backend
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+cd backend
 
-**Use GitHub Codespaces**
+# Install Python dependencies
+pip install -r requirements.txt
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Start the API server (runs on http://localhost:8000)
+uvicorn main:app --reload
+```
 
-## What technologies are used for this project?
+### Train the Disease Model (Optional)
 
-This project is built with:
+If you want to train the CNN model from scratch using the PlantVillage dataset:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+cd backend
 
-## How can I deploy this project?
+# Train (default: 20 epochs)
+python train_model.py --dataset "plantvillage dataset/color" --epochs 20
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+# Resume training from a checkpoint
+python train_model.py --resume --epochs 40
+```
 
-## Can I connect a custom domain to my Lovable project?
+The trained model is saved to `backend/models/plant_disease_model.h5`.
 
-Yes, you can!
+## API Endpoints
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `POST` | `/predict/disease` | Upload image → disease diagnosis |
+| `POST` | `/predict/yield` | JSON body → yield prediction |
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Supported Crops
+
+**Disease Detection:** Apple, Blueberry, Cherry, Corn, Grape, Orange, Peach, Pepper, Potato, Raspberry, Soybean, Squash, Strawberry, Tomato
+
+**Yield Prediction:** Wheat, Rice, Corn/Maize, Soybean, Cotton, Sugarcane, Potato, Tomato, Onion, Barley
+
+## Project Structure
+
+```
+cropwise-ai/
+├── src/                    # React frontend
+│   ├── pages/              # Page components
+│   ├── components/         # UI components
+│   └── lib/history.ts      # localStorage utility
+├── backend/                # Python backend
+│   ├── main.py             # FastAPI app
+│   ├── ai_engine.py        # Disease detection CNN
+│   ├── yield_engine.py     # Yield prediction engine
+│   └── train_model.py      # Model training script
+└── index.html              # Entry point
+```
+
