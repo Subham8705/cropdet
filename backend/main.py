@@ -36,5 +36,12 @@ async def predict_disease(file: UploadFile = File(...)):
     result = detector.predict(image_bytes)
     return result
 
+from yield_engine import yield_engine, YieldInput
+
+@app.post("/predict/yield")
+def predict_yield(data: YieldInput):
+    result = yield_engine.predict(data)
+    return result
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

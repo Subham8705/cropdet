@@ -5,3 +5,5 @@ tensorflow
 numpy
 pillow
 requests
+matplotlib
+scikit-learn

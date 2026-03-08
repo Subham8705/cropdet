@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, Camera, Loader2, AlertTriangle, CheckCircle2, Info, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+// import { supabase } from "@/integrations/supabase/client";
 
 interface DetectionResult {
   disease_name: string;
@@ -56,7 +56,7 @@ export default function DiseaseDetection() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processFile(e.dataTransfer.files[0]);
     }
@@ -73,13 +73,21 @@ export default function DiseaseDetection() {
 
     setLoading(true);
     try {
-      const response = await supabase.functions.invoke("detect-disease", {
-        body: { image: imagePreview },
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await fetch("http://localhost:8000/predict/disease", {
+        method: "POST",
+        body: formData,
       });
 
-      if (response.error) throw response.error;
-      
-      setResult(response.data as DetectionResult);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      setResult(data as DetectionResult);
       toast({
         title: "Analysis Complete",
         description: "Disease detection results are ready.",
@@ -125,7 +133,7 @@ export default function DiseaseDetection() {
               Crop Disease Detection
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Upload a photo of your crop and our AI will analyze it for diseases, 
+              Upload a photo of your crop and our AI will analyze it for diseases,
               providing diagnosis and treatment recommendations.
             </p>
           </div>
@@ -146,11 +154,10 @@ export default function DiseaseDetection() {
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
-                    className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-200 ${
-                      dragActive
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    }`}
+                    className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-200 ${dragActive
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                      }`}
                   >
                     <input
                       type="file"

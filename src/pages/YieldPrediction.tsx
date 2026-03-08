@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, Loader2, Droplets, Thermometer, Wind, BarChart3, AlertCircle, CheckCircle2 } from "lucide-react";
+import { TrendingUp, Loader2, Droplets, Thermometer, Wind, BarChart3, AlertCircle, CheckCircle2, CloudSun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PredictionResult {
   predicted_yield: number;
+  min_yield: number;
+  max_yield: number;
   unit: string;
   risk_level: "low" | "medium" | "high";
   confidence: number;
@@ -22,7 +24,7 @@ interface PredictionResult {
 }
 
 const cropTypes = [
-  "Wheat", "Rice", "Corn/Maize", "Soybean", "Cotton", 
+  "Wheat", "Rice", "Corn/Maize", "Soybean", "Cotton",
   "Sugarcane", "Potato", "Tomato", "Onion", "Barley"
 ];
 
@@ -33,6 +35,7 @@ const soilTypes = [
 export default function YieldPrediction() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PredictionResult | null>(null);
+  const [fetchingWeather, setFetchingWeather] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -63,20 +66,29 @@ export default function YieldPrediction() {
 
     setLoading(true);
     try {
-      const response = await supabase.functions.invoke("predict-yield", {
-        body: {
+      // Use local Python backend
+      const response = await fetch("http://localhost:8000/predict/yield", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           crop_type: formData.cropType,
           location: formData.location,
           soil_type: formData.soilType,
           temperature: parseFloat(formData.temperature),
           rainfall: parseFloat(formData.rainfall),
           humidity: parseFloat(formData.humidity),
-        },
+        }),
       });
 
-      if (response.error) throw response.error;
+      if (!response.ok) {
+        throw new Error("Failed to fetch prediction");
+      }
 
-      setResult(response.data as PredictionResult);
+      const data = await response.json();
+
+      setResult(data as PredictionResult);
       toast({
         title: "Prediction Complete",
         description: "Your yield prediction is ready.",
@@ -90,6 +102,64 @@ export default function YieldPrediction() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWeather = async () => {
+    if (!formData.location) {
+      toast({
+        title: "Location Required",
+        description: "Please enter a location first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFetchingWeather(true);
+    try {
+      const API_KEY = "ebd9cb275530e32cbbe9bd77a8f2e000";
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${formData.location}&appid=${API_KEY}&units=metric`
+      );
+
+      if (!response.ok) {
+        throw new Error("Weather data not found");
+      }
+
+      const data = await response.json();
+
+      // Extract data
+      const temp = data.main.temp;
+      const humidity = data.main.humidity;
+      // Rainfall is tricky, API returns rain object if available (e.g., rain["1h"])
+      // If no rain data, we default to 0 for current weather, but for yield prediction usually we need seasonal.
+      // We'll fill with 0 and let user edit.
+      let rain = 0;
+      if (data.rain) {
+        rain = data.rain["1h"] || data.rain["3h"] || 0;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        temperature: temp.toString(),
+        humidity: humidity.toString(),
+        // Only update rain if API returns > 0, otherwise keep user input or default
+        rainfall: rain > 0 ? rain.toString() : prev.rainfall
+      }));
+
+      toast({
+        title: "Weather Data Fetched",
+        description: `Updated weather for ${data.name}.`,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Fetch Failed",
+        description: "Could not fetch weather data. Please check the location name.",
+        variant: "destructive",
+      });
+    } finally {
+      setFetchingWeather(false);
     }
   };
 
@@ -116,7 +186,7 @@ export default function YieldPrediction() {
               Crop Yield Prediction
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Enter environmental and crop data to get AI-powered yield predictions 
+              Enter environmental and crop data to get AI-powered yield predictions
               with recommendations for optimal harvest.
             </p>
           </div>
@@ -153,12 +223,24 @@ export default function YieldPrediction() {
                   {/* Location */}
                   <div className="space-y-2">
                     <Label htmlFor="location">Location / Region</Label>
-                    <Input
-                      id="location"
-                      placeholder="e.g., Punjab, India"
-                      value={formData.location}
-                      onChange={(e) => handleInputChange("location", e.target.value)}
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        id="location"
+                        placeholder="e.g., Punjab, India"
+                        value={formData.location}
+                        onChange={(e) => handleInputChange("location", e.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={fetchWeather}
+                        disabled={fetchingWeather}
+                        title="Get current weather"
+                      >
+                        {fetchingWeather ? <Loader2 className="h-4 w-4 animate-spin" /> : <CloudSun className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Soil Type */}
@@ -197,7 +279,7 @@ export default function YieldPrediction() {
                     <div className="space-y-2">
                       <Label htmlFor="rainfall" className="flex items-center gap-1">
                         <Droplets className="w-4 h-4 text-primary" />
-                        Rain (mm)
+                        Seasonal Rain (mm)
                       </Label>
                       <Input
                         id="rainfall"
@@ -270,9 +352,9 @@ export default function YieldPrediction() {
                   <div className="space-y-6">
                     {/* Yield Prediction */}
                     <div className="text-center p-6 rounded-xl bg-primary/5 border border-primary/10">
-                      <div className="text-sm text-muted-foreground mb-1">Predicted Yield</div>
-                      <div className="font-display text-5xl font-bold text-primary mb-1">
-                        {result.predicted_yield.toLocaleString()}
+                      <div className="text-sm text-muted-foreground mb-1">Predicted Yield Range</div>
+                      <div className="font-display text-4xl font-bold text-primary mb-1">
+                        {result.min_yield.toLocaleString()} - {result.max_yield.toLocaleString()}
                       </div>
                       <div className="text-lg text-muted-foreground">{result.unit}</div>
                       <div className="mt-2 text-sm text-muted-foreground">
@@ -291,7 +373,7 @@ export default function YieldPrediction() {
                     {/* Recommendations */}
                     <div className="space-y-4">
                       <h4 className="font-semibold text-foreground">Recommendations</h4>
-                      
+
                       <div className="p-4 rounded-xl bg-success/10 border border-success/20">
                         <h5 className="font-semibold text-success mb-1 flex items-center gap-2">
                           <Droplets className="w-4 h-4" />
